@@ -29,6 +29,9 @@ venv.bak/
 dmypy.json
 MANIFEST
 
+# IDEs
+.vscode/
+
 # Added by mp-maker
 **/build
 /config

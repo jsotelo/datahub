@@ -1,0 +1,80 @@
+{{- if .Values.rbac.create -}}
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ include "datahub.fullname" . }}
+  labels:
+    {{- include "datahub.labels" . | nindent 4 }}
+spec:
+  readOnlyRootFilesystem: false
+  privileged: false
+  allowPrivilegeEscalation: false
+  runAsUser:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  seLinux:
+    rule: 'RunAsAny'
+  volumes:
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - persistentVolumeClaim
+    - secret
+    - projected
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: datahub
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - create
+      - delete
+  - apiGroups:
+      - ''
+    resources:
+      - pods/log
+    verbs:
+      - get
+  - apiGroups:
+      - policy
+    resourceNames:
+      - {{ include "datahub.fullname" . }}
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "datahub.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "datahub.fullname" . }}
+subjects:
+{{- /* Create a unique list (set) of all the subchart serviceAccountNames */ -}}
+{{- $serviceAccounts := list (include "datahub.serviceAccountName" .) (include "call-nested" (list . "datahub-frontend" "datahub-frontend.serviceAccountName")) (include "call-nested" (list . "datahub-gms" "datahub-gms.serviceAccountName")) (include "call-nested" (list . "datahub-mae-consumer" "datahub-mae-consumer.serviceAccountName")) (include "call-nested" (list . "datahub-mce-consumer" "datahub-mce-consumer.serviceAccountName")) | uniq -}}
+{{- $namespace := .Release.Namespace -}}
+{{- range $i, $accountName := $serviceAccounts }}
+  - kind: ServiceAccount
+    namespace: {{ $namespace }}
+    name: {{ $accountName }}
+{{- end }}
+{{- end }}

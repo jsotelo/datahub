@@ -13,6 +13,17 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: "datahub-gms-deployment"
 
+# # Environment variables to set as part of the deployment
+# env:
+#   # Example
+#   SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: SASL_PLAINTEXT
+
+# # K8s secrets that should be deployed as environment variables
+# envSecrets:
+#   # In the example below the env variable will be set to the value in the
+#   # secret 'neo4j-Credentials' that shares the same key
+#   NEO4J_PASSWORD: neo4j-credentials
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
