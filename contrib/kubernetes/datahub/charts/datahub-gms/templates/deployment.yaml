@@ -116,6 +116,10 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /etc/krb5.conf
+              name: krb5-config
+              subPath: krb5.conf
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -128,3 +132,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      volumes:
+        - configMap:
+            name: {{ $.Values.krb5ConfigmapName }}
+          name: krb5-config

@@ -78,6 +78,8 @@ tolerations: []
 
 affinity: {}
 
+krb5ConfigmapName: krb5-configmap
+
 global:
   hostAliases:
     - ip: "192.168.0.104"
